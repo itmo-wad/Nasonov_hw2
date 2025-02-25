@@ -22,30 +22,29 @@
         {% endwith %}
 
         <form id="register-form" action="{{ url_for('register') }}" method="post" enctype="multipart/form-data">
-            <label for="username">Username:</label>
+            <label for="username">Username*:</label>
             <input type="text" id="username" name="username" required>
 
-            <label for="password">Password:</label>
+            <label for="password">Password*:</label>
             <input type="password" id="password" name="password" required>
 
-            <label for="repeat-password">Repeat Password:</label>
+            <label for="repeat-password">Repeat Password*:</label>
             <input type="password" id="repeat-password" name="repeat_password" required>
 
-            <label for="age">Age:</label>
+            <label for="age">Age (optional):</label>
             <input type="number" id="age" name="age">
 
-            <label for="sex">Sex:</label>
+            <label for="sex">Sex (optional):</label>
             <select id="sex" name="sex">
                 <option value="">Select...</option>
                 <option value="male">Male</option>
                 <option value="female">Female</option>
-                <option value="other">Other</option>
             </select>
 
-            <label for="bio">Bio:</label>
+            <label for="bio">Bio (optional):</label>
             <textarea id="bio" name="bio" rows="4"></textarea>
 
-            <label for="email">Email:</label>
+            <label for="email">Email (optional):</label>
             <input type="email" id="email" name="email">
 
             <label for="picture">Profile Picture (optional):</label>

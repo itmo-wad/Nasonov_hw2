@@ -65,7 +65,6 @@ def login():
         if user and bcrypt.checkpw(password.encode("utf-8"), user["password"]):
             session["username"] = user["username"]
             session["picture"] = user["picture"]
-            print("Login session = ", session, file=sys.stderr)
             return redirect(url_for("profile"))
         flash("Invalid username or password", "error")
         return redirect(url_for("login"))
@@ -95,7 +94,6 @@ def register():
         hashed_password = bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt())
 
         picture_filename = "bird.jpg"  # Default picture
-        # print("request.files = ", request.files, file=sys.stderr)
         if "picture" in request.files:
             file = request.files["picture"]
             try:
@@ -158,7 +156,6 @@ def profile():
     user = users.find_one({"username": session["username"]})
     if not user:
         return redirect(url_for("login"))
-    # print("Profile user = ", user, file=sys.stderr)
     
     return render_template("profile.html", 
                             username=user["username"],
@@ -190,7 +187,6 @@ def change_picture():
             if os.path.exists(file_path):
                 os.remove(os.path.join(app.config["UPLOAD_FOLDER"], session['picture']))
     except Exception as e:
-        print("ERROR: ", e.__str__(), file=sys.stderr)
         return "Invalid picture", 400
 
     users.update_one(
@@ -198,6 +194,27 @@ def change_picture():
         {"$set": {"picture": unique_filename}}
     )
     return "Picture updated successfully", 200
+
+@app.route("/change_password", methods=["POST"])
+def change_password():
+    if "username" not in session:
+        return "Unauthorized", 401
+
+    username = session["username"]
+    previous_password = request.form["previous_password"]
+    new_password = request.form["new_password"]
+    new_password_repeat = request.form["new_password_repeat"]
+    if(new_password != new_password_repeat):
+        return "Passwords does not match", 400
+
+    user = users.find_one({"username": username})
+    if user and bcrypt.checkpw(previous_password.encode("utf-8"), user["password"]):
+        users.update_one(
+            {"username": username},
+            {"$set": {"password": bcrypt.hashpw(new_password.encode("utf-8"), bcrypt.gensalt())}}
+        )
+        return redirect(url_for("profile"))
+    return "Wrong password provided", 401
 
 @app.route("/uploads/<filename>")
 def uploaded_file(filename, methods=["GET"]):
