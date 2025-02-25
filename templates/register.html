@@ -21,7 +21,7 @@
             {% endif %}
         {% endwith %}
 
-        <form id="register-form" action="{{ url_for('register') }}" method="post" enctype="multipart/form-data">
+        <form id="register-form" action="{{ url_for('register') }}" method="post" enctype="multipart/form-data" onsubmit="return validateForm()">
             <label for="username">Username*:</label>
             <input type="text" id="username" name="username" required>
 
@@ -66,29 +66,6 @@
             }
             return true; // Allow form submission
         }
-
-        document.getElementById('register-form').addEventListener('submit', async function (event) {
-            event.preventDefault(); // Prevent default form submission
-
-            const formData = new FormData(this);
-
-            // Remove the 'picture' field if no file was chosen
-            if (!document.getElementById('picture').files.length) {
-                formData.delete('picture');
-            }
-
-            const response = await fetch("{{ url_for('register') }}", {
-                method: "POST",
-                body: formData
-            });
-
-            if (response.ok) {
-                window.location.href = "{{ url_for('login') }}"; // Redirect to login page
-            } else {
-                const errorMessage = await response.text();
-                alert(errorMessage); // Show error message
-            }
-        });
     </script>
 </body>
 </html>

@@ -96,12 +96,13 @@ def register():
         picture_filename = "bird.jpg"  # Default picture
         if "picture" in request.files:
             file = request.files["picture"]
-            try:
-                picture_filename = upload_file(file)
-            except Exception as e:
-                # Or we can just picture_filename="bird.jpg"???
-                flash("Wrong file", "error")
-                return redirect(url_for("register"))
+            if file.filename != "":
+                try:
+                    picture_filename = upload_file(file)
+                except Exception as e:
+                    # Or we can just picture_filename="bird.jpg"???
+                    flash("Wrong file", "error")
+                    return redirect(url_for("register"))
             
         # This is basically user model in my app
         user_data = {
