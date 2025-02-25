@@ -22,3 +22,4 @@ This project demonstrates how to handle user logic in Flask app.
     - [x] Users are allowed to update profile information
 
 When `docker compose down` and then start again, all loaded images will be deleted and users will be displayed with default pictures.
+Also, I know that I pushed .env file for repository. It is for demonstration purposes.
