@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile - {{ username }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <div class="profile-container">
+        <h1>Welcome to your profile, {{ username }}!</h1>
+        
+        <div class="profile-section">
+            <div class="profile-picture">
+                <img src="{{ url_for('uploaded_file', filename=picture_source) }}" alt="Profile Picture" class="profile-image">
+                
+                <!-- Change Picture Form -->
+                <form id="change-picture-form" enctype="multipart/form-data">
+                    <input type="file" id="picture" name="picture" accept="image/*" style="display: none;">
+                    <button type="button" onclick="document.getElementById('picture').click()">Change Picture</button>
+                </form>
+            </div>
+            
+            <div class="profile-info">
+                <form id="profile-form" onsubmit="submitForm(event)">
+                    <label for="username">Username:</label>
+                    <input type="text" id="username" name="username" value="{{ username }}" readonly>
+                    
+                    <label for="age">Age:</label>
+                    <input type="number" id="age" name="age" value="{{ age }}" disabled>
+                    
+                    <label for="sex">Sex:</label>
+                    <select id="sex" name="sex" disabled>
+                        <option value="male" {% if sex == 'male' %}selected{% endif %}>Male</option>
+                        <option value="female" {% if sex == 'female' %}selected{% endif %}>Female</option>
+                        <option value="other" {% if sex == 'other' %}selected{% endif %}>Other</option>
+                    </select>
+                    
+                    <label for="bio">Bio:</label>
+                    <textarea id="bio" name="bio" rows="4" disabled>{{ bio }}</textarea>
+                    
+                    <label for="email">Email:</label>
+                    <input type="email" id="email" name="email" value="{{ email }}" disabled>
+                    
+                    <div class="edit-buttons" id="edit-buttons" style="display: none;">
+                        <button type="submit" class="save-btn">Save Changes</button>
+                        <button type="button" class="cancel-btn" onclick="cancelEdit()">Cancel</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <div class="actions">
+            <button id="edit-profile-btn" onclick="enableEdit()">Edit Profile</button>
+            <a href="{{ url_for('logout') }}" class="logout-btn">Logout</a>
+        </div>
+    </div>
+
+    <script>
+        let originalData = {};
+
+        function enableEdit() {
+            // Store original data
+            originalData = {
+                age: document.getElementById('age').value,
+                sex: document.getElementById('sex').value,
+                bio: document.getElementById('bio').value,
+                email: document.getElementById('email').value,
+            };
+
+            // Enable all editable fields
+            document.getElementById('age').disabled = false;
+            document.getElementById('sex').disabled = false;
+            document.getElementById('bio').disabled = false;
+            document.getElementById('email').disabled = false;
+
+            // Show Save and Cancel buttons
+            document.getElementById('edit-buttons').style.display = 'block';
+
+            // Hide Edit Profile button
+            document.getElementById('edit-profile-btn').style.display = 'none';
+        }
+
+        function cancelEdit() {
+            // Restore original data
+            document.getElementById('age').value = originalData.age;
+            document.getElementById('sex').value = originalData.sex;
+            document.getElementById('bio').value = originalData.bio;
+            document.getElementById('email').value = originalData.email;
+
+            // Disable all editable fields
+            document.getElementById('age').disabled = true;
+            document.getElementById('sex').disabled = true;
+            document.getElementById('bio').disabled = true;
+            document.getElementById('email').disabled = true;
+
+            // Hide Save and Cancel buttons
+            document.getElementById('edit-buttons').style.display = 'none';
+
+            // Show Edit Profile button
+            document.getElementById('edit-profile-btn').style.display = 'inline-block';
+        }
+
+        function submitForm(event) {
+            event.preventDefault(); // Prevent default form submission
+
+            // Gather edited fields
+            const editedData = {};
+            if (document.getElementById('age').value !== originalData.age) {
+                editedData.age = document.getElementById('age').value;
+            }
+            if (document.getElementById('sex').value !== originalData.sex) {
+                editedData.sex = document.getElementById('sex').value;
+            }
+            if (document.getElementById('bio').value !== originalData.bio) {
+                editedData.bio = document.getElementById('bio').value;
+            }
+            if (document.getElementById('email').value !== originalData.email) {
+                editedData.email = document.getElementById('email').value;
+            }
+
+            // Send PATCH request with only edited fields
+            fetch("{{ url_for('profile') }}", {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(editedData)
+            })
+            .then(response => {
+                if (response.ok) {
+                    window.location.reload(); // Reload the page to reflect changes
+                } else {
+                    alert('Failed to update profile.');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred while updating the profile.');
+            });
+        }
+        function openFileUpload() {
+            // Implement file upload logic here
+            alert("File upload functionality to be implemented.");
+        }
+
+        // Handle file selection
+        document.getElementById('picture').addEventListener('change', function () {
+            const formData = new FormData(document.getElementById('change-picture-form'));
+
+            fetch("{{ url_for('change_picture') }}", {
+                method: "POST",
+                body: formData
+            })
+            .then(response => {
+                if (response.ok) {
+                    window.location.reload(); // Refresh the page to show the new picture
+                } else {
+                    alert('Failed to update profile picture.');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred while updating the profile picture.');
+            });
+        });
+    </script>
+</body>
+</html>
